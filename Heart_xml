@@ -1,0 +1,117 @@
+import xml.etree.ElementTree as ET
+xtree = ET.parse('C:\\Users\\u\\Downloads\\heart_data_nametag.xml')
+xroot = xtree.getroot()
+
+df_cols=['age', 'sex', 'cp', 'trestbps', 'chol', 'fbs',
+          'restecg', 'thalach', 'exang', 'oldpeak', 'slope',
+          'ca', 'thal', 'target']
+
+df_rows=[]
+import pandas as pd
+for node in xroot:
+ s_root=node.attrib.get("person")
+ s_age=node.find("age").text if node is not None else None
+ s_sex=node.find("sex").text if node is not None else None
+ s_cp=node.find("cp").text if node is not None else None
+ s_trestbps=node.find("trestbps").text if node is not None else None
+ s_chol=node.find("chol").text if node is not None else None
+ s_fbs=node.find("fbs").text if node is not None else None
+ s_restecg=node.find("restecg").text if node is not None else None
+ s_thalach=node.find("thalach").text if node is not None else None
+ s_exang=node.find("exang").text if node is not None else None
+ s_oldpeak=node.find("oldpeak").text if node is not None else None
+ s_slope=node.find("slope").text if node is not None else None
+ s_ca=node.find("ca").text if node is not None else None
+ s_thal=node.find("thal").text if node is not None else None
+ s_target=node.find("target").text if node is not None else None
+ 
+ df_rows.append({"person":s_root, "age":s_age,
+              "sex":s_sex, "cp" : s_cp,'trestbps':s_trestbps, 'chol':s_chol,
+            'fbs':s_fbs, 'restecg':s_restecg, 'thalach':s_thalach, 'exang':
+                 s_exang, 'oldpeak':s_oldpeak, 'slope':s_slope, 'ca':s_ca,
+                 'thal':s_thal, 'target':s_target})
+ 
+out_df= pd.DataFrame(df_rows,columns=df_cols) 
+
+import seaborn as sns
+import matplotlib.pyplot as plt
+sns.countplot(x='age',data=out_df.sort_values('age'))
+plt.show()
+sns.countplot(x='sex',data=out_df.sort_values('sex'))
+plt.show()
+sns.countplot(x='cp',data=out_df.sort_values('cp'))
+plt.show()
+sns.countplot(x='trestbps',data=out_df.sort_values('trestbps'))
+plt.show()
+sns.countplot(x='chol',data=out_df.sort_values('chol'))
+plt.show()
+sns.countplot(x='fbs',data=out_df.sort_values('fbs'))
+plt.show()
+sns.countplot(x='restecg',data=out_df.sort_values('restecg'))
+plt.show()
+sns.countplot(x='thalach',data=out_df.sort_values('thalach'))
+plt.show()
+sns.countplot(x='exang',data=out_df.sort_values('exang'))
+plt.show()
+sns.countplot(x='oldpeak',data=out_df.sort_values('oldpeak'))
+plt.show()
+sns.countplot(x='slope',data=out_df.sort_values('slope'))
+plt.show()
+sns.countplot(x='ca',data=out_df.sort_values('ca'))
+plt.show()
+sns.countplot(x='thal',data=out_df.sort_values('thal'))
+plt.show()
+sns.countplot(x='target',data=out_df.sort_values('target'))
+plt.show()
+
+from sklearn.model_selection import train_test_split
+out_df_drop = out_df.drop(['target'],axis=1)
+heart_data = out_df_drop.to_numpy()
+heart_label = out_df['target'].to_numpy()
+X_train, X_test = train_test_split(heart_data,test_size=0.3, random_state=3)
+Y_train, Y_test = train_test_split(heart_label, test_size=0.3, random_state=3)
+from sklearn.preprocessing import StandardScaler
+scaler = StandardScaler()
+X_train_std = scaler.fit_transform(X_train)
+X_test_std = scaler.transform(X_test)
+from sklearn.linear_model import LogisticRegression
+model = LogisticRegression()
+model.fit(X_train_std,Y_train)
+print(model.score(X_train_std,Y_train)) #0.839622641509434
+print(model.score(X_test_std,Y_test)) #0.8791208791208791
+print(model.coef_)
+#[[-0.04540207 -0.59371784  0.81575823 -0.26405274 -0.13891086  0.05466015
+#   0.17916269  0.48451211 -0.39767263 -0.64796531  0.35926138 -0.5788615
+#  -0.58179364]]
+print(model.intercept_) #[0.02307624]
+
+from sklearn import tree
+from sklearn.tree import DecisionTreeClassifier, export_graphviz
+classifier = DecisionTreeClassifier()
+classifier.fit(X_train,Y_train)
+print(classifier.score(X_test,Y_test)) #0.7362637362637363
+print(classifier.score(X_train,Y_train)) #1.0
+df_col2=['age', 'sex', 'cp', 'trestbps', 'chol', 'fbs',
+          'restecg', 'thalach', 'exang', 'oldpeak', 'slope',
+          'ca', 'thal']
+import pydot
+import graphviz
+import matplotlib.pyplot as plt
+classifierLim = DecisionTreeClassifier(max_depth=3,random_state=3)
+classifierLim.fit(X_train, Y_train)
+fig, axes = plt.subplots(nrows = 1,ncols = 1,figsize = (4,4), dpi=300)
+tree.plot_tree(classifierLim, feature_names=df_col2, class_names='target', filled=True);
+fig.savefig('C:\\Users\\u\\Downloads\\imagename.png')
+
+import numpy as np
+from sklearn.preprocessing import StandardScaler
+sc = StandardScaler()
+sc.fit(X_train)
+X_train_std = sc.transform(X_train)
+X_test_std = sc.transform(X_test)
+from sklearn.svm import SVC
+svm_model = SVC(kernel='rbf', C=8, gamma=0.1)
+svm_model.fit(X_train_std, Y_train)
+y_pred = svm_model.predict(X_test_std)
+print(svm_model.score(X_test_std, Y_test)) #0.8681318681318682
+
